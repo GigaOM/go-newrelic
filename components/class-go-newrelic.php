@@ -25,7 +25,7 @@ class GO_NewRelic
 
 		// the license key is typically set elsewhere during the daemon/module installation, 
 		// but this allows some potential future where the license key is set in the WP dashboard
-		if( ! empty( $this->config['license'] ))
+		if( ! empty( $this->config['license'] ) )
 		{
 			ini_set( 'newrelic.license', $this->config['license'] );
 		}
