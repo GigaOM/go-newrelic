@@ -1,6 +1,6 @@
 === Gigaom New Relic ===
 Contributors: misterbisson
-Tags: monitoring, telemetry, server monitoring, performance monitoring
+Tags: monitoring, telemetry, server monitoring, performance monitoring, newrelic, new relic, Gigaom
 Requires at least: 3.5.1
 Tested up to: 3.6.1
 Stable tag: trunk
