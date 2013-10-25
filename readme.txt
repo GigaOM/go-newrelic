@@ -26,4 +26,5 @@ Follow Gigaom at https://github.com/gigaom/ and http://kitchen.gigaom.com
 
 == Screenshots ==
 
-None yet.
+1. New Relic application list, showing two blogs. Each WordPress blog is reported as four applications in New Relic to separate reader, writer, cron, and admin-ajax activity for better detail and fine-grained control.
+2. New Relic application overview, showing performance history for a single app.
