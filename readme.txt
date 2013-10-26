@@ -15,7 +15,7 @@ Separately reports user-facing and dashboard activity, even separates cron and a
 
 Each blog in a multi-site installation is tracked separately, using the name of the blog as the app name.
 
-Follow Gigaom at https://github.com/gigaom/ and http://kitchen.gigaom.com
+Fork this project from https://github.com/gigaom/go-newrelic , and follow Gigaom at https://github.com/gigaom/ and http://kitchen.gigaom.com
 
 == Installation ==
 
