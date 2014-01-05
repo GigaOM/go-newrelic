@@ -2,7 +2,7 @@
 Contributors: misterbisson
 Tags: monitoring, telemetry, server monitoring, performance monitoring, newrelic, new relic, Gigaom
 Requires at least: 3.5.1
-Tested up to: 3.6.1
+Tested up to: 3.8
 Stable tag: trunk
 
 Configures New Relic to better track performance, errors, and uptime of WordPress sites, including multisite
