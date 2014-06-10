@@ -34,7 +34,10 @@ class GO_NewRelic
 		ini_set( 'newrelic.framework', 'wordpress' );
 		ini_set( 'newrelic.transaction_tracer.detail', $this->config['transaction-tracer-detail'] );
 		ini_set( 'newrelic.error_collector.enabled', $this->config['error-collector-enabled'] );
-		ini_set( 'newrelic.capture_params', $this->config['capture-params'] );
+		if ( isset( $this->config['capture-params'] ) && $this->config['capture-params'] )
+		{
+			newrelic_capture_params();
+		}
 		ini_set( 'newrelic.ignored_params', $this->config['ignored-params'] );
 
 		// get the base app name from the home_url()
