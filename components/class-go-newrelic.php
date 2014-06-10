@@ -4,6 +4,8 @@ class GO_NewRelic
 {	
 	public function __construct()
 	{
+		// this whole class needs some codesniffer cleanup
+
 		// exit early if we don't have the New Relic extension
 		// see https://newrelic.com/docs/php/new-relic-for-php for installation instructions
 		if ( ! function_exists( 'newrelic_set_appname' ) )
