@@ -1,7 +1,7 @@
 <?php
 
 class GO_NewRelic
-{	
+{
 	public function __construct()
 	{
 		// exit early if we don't have the New Relic extension
@@ -73,7 +73,7 @@ class GO_NewRelic
 		}
 
 		// track the user info
-		add_action( 'init' , array( $this , 'init' ) );
+		add_action( 'init' , array( $this, 'init' ) );
 	}
 
 	// add user info now that we know it
