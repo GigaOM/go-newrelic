@@ -1,7 +1,7 @@
 <?php
 
 class GO_NewRelic
-{	
+{
 	public function __construct()
 	{
 		// exit early if we don't have the New Relic extension
@@ -11,7 +11,7 @@ class GO_NewRelic
 			return FALSE;
 		}
 
-		// config array keys are the NR config names with sanitize_title_with_dashes() applied 
+		// config array keys are the NR config names with sanitize_title_with_dashes() applied
 		// and the `newrelic` prefix removed
 		// see https://newrelic.com/docs/php/php-agent-phpini-settings for details
 		$this->config = apply_filters( 'go_config', array(
@@ -23,7 +23,7 @@ class GO_NewRelic
 			'error-collector-enabled' => FALSE,
 		), 'go-newrelic' );
 
-		// the license key is typically set elsewhere during the daemon/module installation, 
+		// the license key is typically set elsewhere during the daemon/module installation,
 		// but this allows some potential future where the license key is set in the WP dashboard
 		if ( ! empty( $this->config['license'] ) )
 		{
@@ -58,7 +58,7 @@ class GO_NewRelic
 			{
 				newrelic_set_appname( $app_name . ' admin' );
 			}
-		}
+		}// end if
 		elseif ( defined( 'DOING_CRON' ) && DOING_CRON )
 		{
 			newrelic_set_appname( $app_name . ' cron' );
@@ -69,12 +69,12 @@ class GO_NewRelic
 			newrelic_set_appname( $app_name );
 
 			// add more tracking of the template pieces
-			add_action( 'template_include' , array( $this , 'template_include' ) );
+			add_action( 'template_include', array( $this, 'template_include' ) );
 		}
 
 		// track the user info
-		add_action( 'init' , array( $this , 'init' ) );
-	}
+		add_action( 'init', array( $this, 'init' ) );
+	}//end_construct
 
 	// add user info now that we know it
 	public function init()
@@ -85,7 +85,7 @@ class GO_NewRelic
 			return;
 		}
 
-		// see https://newrelic.com/docs/features/browser-traces#set_user_attributes 
+		// see https://newrelic.com/docs/features/browser-traces#set_user_attributes
 		// for docs on how to use the user info in the transaction trace
 		if ( is_user_logged_in() )
 		{
@@ -101,7 +101,7 @@ class GO_NewRelic
 	// track the template we're using
 	public function template_include( $template )
 	{
-		newrelic_add_custom_parameter( 'template' , $template );
+		newrelic_add_custom_parameter( 'template', $template );
 		return $template;
 	}
 
@@ -111,14 +111,14 @@ class GO_NewRelic
 		newrelic_ignore_transaction();
 		newrelic_ignore_apdex();
 	}
-}
+}//end class
 
 function go_newrelic()
 {
 	global $go_newrelic;
 
 	if ( ! isset( $go_newrelic ) || ! is_object( $go_newrelic ) )
-	{	
+	{
 		$go_newrelic = new GO_NewRelic();
 	}
 
