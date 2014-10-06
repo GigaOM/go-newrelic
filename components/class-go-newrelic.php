@@ -30,7 +30,7 @@ class GO_NewRelic
 		if ( ! empty( $this->config['license'] ) )
 		{
 			ini_set( 'newrelic.license', $this->config['license'] );
-		}
+		} // END if
 
 		// basic settings
 		ini_set( 'newrelic.framework', 'wordpress' );
@@ -39,7 +39,7 @@ class GO_NewRelic
 		if ( isset( $this->config['capture-params'] ) && $this->config['capture-params'] )
 		{
 			newrelic_capture_params();
-		}
+		} // END if
 		ini_set( 'newrelic.ignored_params', $this->config['ignored-params'] );
 
 		// get the base app name from the home_url()
@@ -55,28 +55,28 @@ class GO_NewRelic
 			{
 				newrelic_set_appname( $app_name . ' ajax' );
 				newrelic_disable_autorum();
-			}
+			} // END if
 			else
 			{
 				newrelic_set_appname( $app_name . ' admin' );
-			}
+			} // END else
 		}// end if
 		elseif ( defined( 'DOING_CRON' ) && DOING_CRON )
 		{
 			newrelic_set_appname( $app_name . ' cron' );
 			newrelic_disable_autorum();
-		}
+		} // END elseif
 		else
 		{
 			newrelic_set_appname( $app_name );
 
 			// add more tracking of the template pieces
 			add_action( 'template_include', array( $this, 'template_include' ) );
-		}
+		} // END else
 
 		// track the user info
 		add_action( 'init', array( $this, 'init' ) );
-	}//end_construct
+	} //END __construct
 
 	// add user info now that we know it
 	public function init()
@@ -85,7 +85,7 @@ class GO_NewRelic
 		if ( ! function_exists( 'newrelic_set_user_attributes' ) )
 		{
 			return;
-		}
+		} // END if
 
 		// see https://newrelic.com/docs/features/browser-traces#set_user_attributes
 		// for docs on how to use the user info in the transaction trace
@@ -93,26 +93,26 @@ class GO_NewRelic
 		{
 			$user = wp_get_current_user();
 			newrelic_set_user_attributes( $user->ID, '', array_shift( $user->roles ) );
-		}
+		} // END if
 		else
 		{
 			newrelic_set_user_attributes( 'not-logged-in', '', 'no-role' );
-		}
-	}
+		} // END else
+	} //END init
 
 	// track the template we're using
 	public function template_include( $template )
 	{
 		newrelic_add_custom_parameter( 'template', $template );
 		return $template;
-	}
+	} // END template_include
 
 	// a method other plugins can call to ignore this transaction
 	public function ignore()
 	{
 		newrelic_ignore_transaction();
 		newrelic_ignore_apdex();
-	}
+	} //END ignore
 }//end class
 
 function go_newrelic()
@@ -122,7 +122,7 @@ function go_newrelic()
 	if ( ! isset( $go_newrelic ) || ! is_object( $go_newrelic ) )
 	{
 		$go_newrelic = new GO_NewRelic();
-	}
+	} // END if
 
 	return $go_newrelic;
 } // END go_newrelic
