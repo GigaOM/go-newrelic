@@ -2,15 +2,11 @@
 
 class GO_NewRelic
 {
+	private $admin;
+	private $config;
+
 	public function __construct()
 	{
-		// exit early if we don't have the New Relic extension
-		// see https://newrelic.com/docs/php/new-relic-for-php for installation instructions
-		if ( ! function_exists( 'newrelic_set_appname' ) )
-		{
-			return FALSE;
-		}
-
 		// config array keys are the NR config names with sanitize_title_with_dashes() applied
 		// and the `newrelic` prefix removed
 		// see https://newrelic.com/docs/php/php-agent-phpini-settings for details
@@ -22,6 +18,14 @@ class GO_NewRelic
 			'ignored-params' => '',
 			'error-collector-enabled' => FALSE,
 		), 'go-newrelic' );
+
+		// exit early if we don't have the New Relic extension
+		// see https://newrelic.com/docs/php/new-relic-for-php for installation instructions
+		if ( ! function_exists( 'newrelic_set_appname' ) )
+		{
+			$this->client();
+			return;
+		}//end if
 
 		// the license key is typically set elsewhere during the daemon/module installation,
 		// but this allows some potential future where the license key is set in the WP dashboard
@@ -76,7 +80,23 @@ class GO_NewRelic
 		add_action( 'init', array( $this, 'init' ) );
 	}// END __construct
 
-	// add user info now that we know it
+	/**
+	 * an object accessor for the client object
+	 */
+	public function client()
+	{
+		if ( ! $this->client )
+		{
+			require_once __DIR__ . '/class-go-newrelic-client.php';
+			$this->client = new GO_NewRelic_Client();
+		}// end if
+
+		return $this->client;
+	} // END client
+
+	/**
+	 * add user info now that we know it
+	 */
 	public function init()
 	{
 		// not all versions of the php extension support this method
@@ -98,14 +118,18 @@ class GO_NewRelic
 		}// END else
 	}// END init
 
-	// track the template we're using
+	/**
+	 * track the template we're using
+	 */
 	public function template_include( $template )
 	{
 		newrelic_add_custom_parameter( 'template', $template );
 		return $template;
 	}// END template_include
 
-	// a method other plugins can call to ignore this transaction
+	/**
+	 * a method other plugins can call to ignore this transaction
+	 */
 	public function ignore()
 	{
 		newrelic_ignore_transaction();
