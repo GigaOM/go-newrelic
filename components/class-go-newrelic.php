@@ -3,7 +3,7 @@
 class GO_NewRelic
 {
 	private $admin;
-	private $config;
+	private $browser;
 
 	public function __construct()
 	{
@@ -23,7 +23,7 @@ class GO_NewRelic
 		// see https://newrelic.com/docs/php/new-relic-for-php for installation instructions
 		if ( ! function_exists( 'newrelic_set_appname' ) )
 		{
-			$this->client();
+			$this->browser();
 			return;
 		}//end if
 
@@ -81,18 +81,18 @@ class GO_NewRelic
 	}// END __construct
 
 	/**
-	 * an object accessor for the client object
+	 * an object accessor for the browser object
 	 */
-	public function client()
+	public function browser()
 	{
-		if ( ! $this->client )
+		if ( ! $this->browser )
 		{
-			require_once __DIR__ . '/class-go-newrelic-client.php';
-			$this->client = new GO_NewRelic_Client();
+			require_once __DIR__ . '/class-go-newrelic-browser.php';
+			$this->browser = new GO_NewRelic_Browser();
 		}// end if
 
-		return $this->client;
-	} // END client
+		return $this->browser;
+	} // END browser
 
 	/**
 	 * add user info now that we know it
