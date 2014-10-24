@@ -95,6 +95,9 @@ class GO_NewRelic_Browser
 			list( $key, $value ) = explode( ':', $var );
 			$value = trim( $value, '"' );
 
+			$key = sanitize_title( $key );
+			$value = sanitize_text_field( $value );
+
 			$settings[ $key ] = $value;
 		}// end foreach
 
