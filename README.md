@@ -36,7 +36,7 @@ This mode requires some configuration:
 
 The plugin extracts the configuration details from the JS and inserts them with a clean copy of the JS on each page (this cannot be used to inject arbitrary JS into the page).
 
-Due to limitations of the Browser monitoring service/API, Browser monitoring does not include all the data or separate reporting of activity in separate apps as APM does.
+Due to limitations of the Browser monitoring service/API, Browser-only monitoring does not include all the data or separate reporting of activity in separate apps as APM does.
 
 ### = In the WordPress.org plugin repo =
 
