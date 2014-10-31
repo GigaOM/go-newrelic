@@ -10,7 +10,7 @@ class GO_NewRelic_APM
 		// get the calling object
 		$this->go_newrelic = $go_newrelic;
 
-		// can't lazy load the config, we need 
+		// can't lazy load the config, we need
 		$this->config = $this->go_newrelic->config();
 
 		// the license key is typically set elsewhere during the daemon/module installation,

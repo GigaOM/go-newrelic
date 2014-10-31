@@ -119,15 +119,9 @@ class GO_NewRelic
 		{
 			$app_name .= ' cron';
 		}// END elseif
-		else
-		{
-			// this empty case is here if we want to change the default app name further
-		}// END else
 
 		return $app_name;
 	}//END get_appname
-
-
 }// END class
 
 function go_newrelic()
