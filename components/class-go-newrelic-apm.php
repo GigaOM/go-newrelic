@@ -3,20 +3,15 @@
 class GO_NewRelic_APM
 {
 	private $config;
+	private $go_newrelic;
 
-	public function __construct()
+	public function __construct( $go_newrelic )
 	{
-		// config array keys are the NR config names with sanitize_title_with_dashes() applied
-		// and the `newrelic` prefix removed
-		// see https://newrelic.com/docs/php/php-agent-phpini-settings for details
-		$this->config = apply_filters( 'go_config', array(
-			'license' => '',
-			'transaction-tracer-detail' => 0,
-			'newrelic-loglevel' => 'info',
-			'capture-params' => TRUE,
-			'ignored-params' => '',
-			'error-collector-enabled' => FALSE,
-		), 'go-newrelic' );
+		// get the calling object
+		$this->go_newrelic = $go_newrelic;
+
+		// can't lazy load the config, we need
+		$this->config = $this->go_newrelic->config();
 
 		// the license key is typically set elsewhere during the daemon/module installation,
 		// but this allows some potential future where the license key is set in the WP dashboard
@@ -25,7 +20,12 @@ class GO_NewRelic_APM
 			ini_set( 'newrelic.license', $this->config['license'] );
 		}// END if
 
+		// set the app name
+		newrelic_set_appname( $this->go_newrelic->get_appname() );
+
 		// basic settings
+		// make sure the config isn't empty or invalid for any of these
+		// ...sanity and validation intentionally skipped for performance reasons
 		ini_set( 'newrelic.framework', 'wordpress' );
 		ini_set( 'newrelic.transaction_tracer.detail', $this->config['transaction-tracer-detail'] );
 		ini_set( 'newrelic.error_collector.enabled', $this->config['error-collector-enabled'] );
@@ -33,36 +33,23 @@ class GO_NewRelic_APM
 		{
 			newrelic_capture_params();
 		}// END if
-		ini_set( 'newrelic.ignored_params', $this->config['ignored-params'] );
+		ini_set( 'newrelic.ignored_params', $this->go_newrelic->config( 'ignored-params' ) );
 
-		// get the base app name from the home_url()
-		$home_url = parse_url( home_url() );
-		$app_name = $home_url['host'] . ( isset( $home_url['path'] ) ? $home_url['path'] : '' );
-
-		// the dashboard, admin-ajax, cron, and front-end are all logged as separate apps
-		// this allows us to set different thresholds for those very different aspects of each site
-		// see https://newrelic.com/docs/php/the-php-api for documentation on NR's PHP methods
+		// set logging parameters based on request context
+		// ajax responses _cannot_ have RUM in them, for example
 		if ( is_admin() )
 		{
 			if ( defined( 'DOING_AJAX' ) && DOING_AJAX )
 			{
-				newrelic_set_appname( $app_name . ' ajax' );
 				newrelic_disable_autorum();
 			}// END if
-			else
-			{
-				newrelic_set_appname( $app_name . ' admin' );
-			}// END else
 		}// end if
 		elseif ( defined( 'DOING_CRON' ) && DOING_CRON )
 		{
-			newrelic_set_appname( $app_name . ' cron' );
 			newrelic_disable_autorum();
 		}// END elseif
 		else
 		{
-			newrelic_set_appname( $app_name );
-
 			// add more tracking of the template pieces
 			add_action( 'template_include', array( $this, 'template_include' ) );
 		}// END else

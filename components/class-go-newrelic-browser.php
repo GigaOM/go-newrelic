@@ -20,7 +20,7 @@ class GO_NewRelic_Browser
 
 	public function admin_menu()
 	{
-		add_plugins_page( $this->name . ' Settings', $this->name . ' Settings', 'manage_options', $this->slug . '-settings', array( $this, 'settings' ) );
+		add_options_page( $this->name . ' Settings', $this->name . ' Settings', 'manage_options', $this->slug . '-settings', array( $this, 'settings' ) );
 	}// end admin_menu
 
 	public function output_browser_tracking_code()

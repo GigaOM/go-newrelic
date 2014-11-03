@@ -47,11 +47,15 @@ Exporting the HEAD of master from git to SVN
 ';
 passthru( "git checkout-index -a -f --prefix=$svn_repo_path/" );
 
-
 echo '
 Exporting git submodules to SVN
 ';
 passthru( "git submodule foreach 'git checkout-index -a -f --prefix=$svn_repo_path/\$path/'" );
+
+echo '
+Copying and reformatting README.md to readme.txt
+';
+passthru( "cat README.md | sed 's/^\#* //' > $svn_repo_path/readme.txt" );
 
 echo '
 Removing any svn:executable properties for security
