@@ -1,6 +1,6 @@
 # === Gigaom New Relic ===
 
-Contributors: misterbisson
+Contributors: misterbisson, zbtirrell
 
 Tags: monitoring, telemetry, server monitoring, performance monitoring, newrelic, new relic, Gigaom
 
