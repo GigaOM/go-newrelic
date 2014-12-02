@@ -12,8 +12,8 @@ class GO_NewRelic_Browser
 		if ( $this->settings )
 		{
 			// New Relic claims we are not tracking because the code should occur before any other scripts in the head, let's move it up!
-			add_action( 'wp_head', array( $this, 'output_browser_tracking_code' ), 1 );
-			add_action( 'admin_print_scripts', array( $this, 'output_browser_tracking_code' ) );
+			add_action( 'wp_head', array( $this, 'output_browser_tracking_code' ), 0 );
+			add_action( 'admin_print_scripts', array( $this, 'output_browser_tracking_code' ), 0 );
 		}//end if
 
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
