@@ -4,18 +4,27 @@ class GO_NewRelic
 {
 	private $apm;
 	private $browser;
+	private $wpcli;
 
 	public function __construct()
 	{
-		// use the fancier APM if we have the New Relic extension
+		// use the fancier APM if we have the New Relic module for PHP
 		// see https://newrelic.com/docs/php/new-relic-for-php for installation instructions
 		if ( function_exists( 'newrelic_set_appname' ) )
 		{
 			$this->apm();
-			return;
 		}//end if
+		// browser monitoring works even when the PHP module isn't installed
+		else
+		{
+			$this->browser();
+		}
 
-		$this->browser();
+		// WPCLI methods to excercize a site
+		if ( defined( 'WP_CLI' ) && WP_CLI )
+		{
+			$this->wpcli();
+		}//end if
 	}// END __construct
 
 	/**
@@ -45,6 +54,22 @@ class GO_NewRelic
 
 		return $this->apm;
 	} // END apm
+
+	/**
+	 * A loader for the WP:CLI class
+	 */
+	public function wpcli()
+	{
+		if ( ! $this->wpcli )
+		{
+			require_once __DIR__ . '/class-go-newrelic-wpcli.php';
+
+			// declare the class to WP:CLI
+			WP_CLI::add_command( 'go-newrelic', 'GO_NewRelic_Wpcli' );
+
+			$this->wpcli = TRUE;
+		}
+	}//end wpcli
 
 	/**
 	 * returns our current configuration, or a value in the configuration.
