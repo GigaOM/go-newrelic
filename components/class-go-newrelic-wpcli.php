@@ -86,7 +86,7 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 			// the URL we're testing now
 			if ( $args->rand )
 			{
-				$test_url = add_query_arg( array( 'go-newrelic-excercize' => rand() ), $args->url );
+				$test_url = add_query_arg( array( 'go-newrelic-exercise' => rand() ), $args->url );
 			}
 			else
 			{
@@ -100,7 +100,7 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 			$fetch_raw = wp_remote_get( $test_url, array(
 				'timeout'     => 90,
 				'redirection' => absint( $args->redirection ),
-				'headers'     => array( 'x-go-newrelic-excercize' => rand() ),
+				'headers'     => array( 'x-go-newrelic-exercise' => rand() ),
 				'user-agent'  => 'go-newrelic WordPress exerciser',
 				'sslverify'   => FALSE, // this would be hugely insecure if we were doing anything with the data returned, but since this is used for testing (often against local hosts with self-signed certs)....
 			) );

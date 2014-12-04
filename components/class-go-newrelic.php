@@ -20,7 +20,7 @@ class GO_NewRelic
 			$this->browser();
 		}
 
-		// WPCLI methods to excercize a site
+		// WPCLI methods to exercise a site
 		if ( defined( 'WP_CLI' ) && WP_CLI )
 		{
 			$this->wpcli();
