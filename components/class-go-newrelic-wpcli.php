@@ -1,13 +1,25 @@
 <?php
+
+/*
+ * Args:
+ * A URL or filename containing a list of URLs
+ *	...A list of URLs should be a text file with one URL per line
+ * --count: the integer number of times to test the named URL(s)
+ * --rand: if present will cause the excerciser to insert random get vars that (maybe) will prevent page caching
+ * --redirection: the number of redirects to follow, 0 is default
+ *
+ * Examples:
+ * wp --url=wpsite.example.org go-newrelic excercise "http://wpsite.example.org/" --count=13 --rand
+ * wp --url=wpsite.example.org go-newrelic excercise url-list.txt --count=13 --rand
+ *
+ * TODO:
+ * Metrics are collected for summation, but none is done.
+ * Summation by URL and among a group of URLs would be great
+ * Output in CSV form, maybe...
+ */
+
 class GO_NewRelic_Wpcli extends WP_CLI_Command
 {
-	public function find_urls( $text )
-	{
-		// nice regex thanks to John Gruber http://daringfireball.net/2010/07/improved_regex_for_matching_urls
-		preg_match_all( '#(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))#', $text, $urls );
-		return $urls[0];
-	}
-
 	public function excercise( $args, $assoc_args )
 	{
 		// don't this in New Relic
@@ -18,7 +30,7 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 
 		if ( empty( $args ) )
 		{
-			WP_CLI::error( 'Please specify a URL to test.' );
+			WP_CLI::error( 'Please specify a URL (or file with URLs) to test.' );
 			return;
 		}
 
@@ -29,41 +41,68 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 
 		if (
 			file_exists( $args[0] ) &&
-			$list = file_get_contents( $args[0] )
+			( $lines = file( $args[0], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES ) )
 		)
 		{
-			
+			shuffle( $lines );
+			foreach ( $lines as $url )
+			{
+				$assoc_args['url'] = $this->find_url( $url );
+				self::test_url( $assoc_args );
+			}
 		}
 		else
 		{
-			$assoc_args['url'] = $args[0];
+			$assoc_args['url'] = $this->find_url( $args[0] );
+			self::test_url( $assoc_args );
 		}
+	}
 
-		$args = (object) array_intersect_key( $assoc_args, array(
-			'url' => TRUE,
-			'count' => TRUE,
+	public function test_url( $args )
+	{
+		$args = (object) wp_parse_args( $args, array(
+			'url' => NULL,
+			'count' => 11,
+			'redirection' => 0,
+			'rand' => FALSE,
 		) );
 
-		if ( ! isset( $args->count ) )
+		if ( ! $args->url )
 		{
-			$args->count = 17;
+			WP_CLI::warning( 'Empty URL, skipping.' );
+			return;
 		}
+
+		WP_CLI::line( "\n$args->url" );
+		if ( $args->rand )
+		{
+			WP_CLI::line( "URL will include randomized get vars to (maybe) break caching" );
+		}
+		WP_CLI::line( "Response\nCode\tSize\tTime\tCookies\tLast Modified\t\t\tCache Control\t\t\tCanonical" );
 
 		$runs = array();
 		for ( $i = 1; $i <= $args->count; $i++ )
 		{
 			// the URL we're testing now
-//			$test_url = add_query_arg( array( 'go-newrelic-excercize' => rand() ), $args->url );
-			$test_url = $args->url;
+			if ( $args->rand )
+			{
+				$test_url = add_query_arg( array( 'go-newrelic-excercize' => rand() ), $args->url );
+			}
+			else
+			{
+				$test_url = $args->url;
+			}
 
 			// init this stat run
 			$runs[ $i ] = (object) array( 'request_url' => $test_url );
 
-			WP_CLI::line( $test_url );
 			$start_time = microtime( TRUE );
 			$fetch_raw = wp_remote_get( $test_url, array(
-				'timeout'    => 90,
-				'user-agent' => 'go-newrelic WordPress exerciser',
+				'timeout'     => 90,
+				'redirection' => absint( $args->redirection ),
+				'headers'     => array( 'x-go-newrelic-excercize' => rand() ),
+				'user-agent'  => 'go-newrelic WordPress exerciser',
+				'sslverify'   => FALSE, // this would be hugely insecure if we were doing anything with the data returned, but since this is used for testing (often against local hosts with self-signed certs)....
 			) );
 
 			// time the request
@@ -81,13 +120,59 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 
 			// the last modified header
 			$temp = wp_remote_retrieve_header( $fetch_raw, 'last-modified' );
-			$runs[ $i ]->response_modified = is_array( $temp ) ? 'WARNING, ' . count( $temp ) .' headers found' : $temp;
+			$runs[ $i ]->response_modified = is_array( $temp ) ? 'WARNING, ' . count( $temp ) .' headers found' : empty( $temp ) ? "Null response\t\t" : $temp;
 
 			// the cache control header
 			$temp = wp_remote_retrieve_header( $fetch_raw, 'cache-control' );
-			$runs[ $i ]->response_cachecontrol = is_array( $temp ) ? 'WARNING, ' . count( $temp ) .' headers found' : $temp;
-		}
+			$runs[ $i ]->response_cachecontrol = is_array( $temp ) ? 'WARNING, ' . count( $temp ) .' headers found' : empty( $temp ) ? "Null response\t\t" : $temp;
 
-		print_r( $runs );
+			// canonical or redirect?
+			$runs[ $i ]->response_canonical = 'Null response'; // default value, override if another is found
+			$temp = wp_remote_retrieve_header( $fetch_raw, 'location' );
+			if (
+				! empty( $temp ) &&
+				! is_array( $temp )
+			)
+			{
+				$runs[ $i ]->response_canonical = $this->find_url( $temp );
+			}
+			else
+			{
+				preg_match_all( '#<link([^>]+)(/>|></link>)#is', wp_remote_retrieve_body( $fetch_raw ), $matches );
+				foreach ( $matches[1] as $temp )
+				{
+					if ( preg_match( '#rel\s?=[^=]*canonical#is', $temp ) )
+					{
+						$runs[ $i ]->response_canonical = $this->find_url( $temp );
+						break;
+					}
+				}
+
+			}
+
+			WP_CLI::line( sprintf(
+				"%d\t%sK\t%s\t%d\t%s\t%s\t%s",
+				$runs[ $i ]->response_code,
+				number_format( $runs[ $i ]->response_size / 1024, 1 ),
+				number_format( $runs[ $i ]->response_time, 2 ),
+				$runs[ $i ]->response_cookies,
+				$runs[ $i ]->response_modified,
+				$runs[ $i ]->response_cachecontrol,
+				$runs[ $i ]->response_canonical
+			) );
+		}
+	}
+
+	public function find_url( $text )
+	{
+		// nice regex thanks to John Gruber http://daringfireball.net/2010/07/improved_regex_for_matching_urls
+		preg_match_all( '#(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))#', $text, $urls );
+
+		if ( ! isset( $urls[0][0] ) )
+		{
+			return NULL;
+		} 
+
+		return $urls[0][0];
 	}
 }
