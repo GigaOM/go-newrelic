@@ -5,12 +5,12 @@
  * A URL or filename containing a list of URLs
  *	...A list of URLs should be a text file with one URL per line
  * --count: the integer number of times to test the named URL(s)
- * --rand: if present will cause the excerciser to insert random get vars that (maybe) will prevent page caching
+ * --rand: if present will cause the exerciser to insert random get vars that (maybe) will prevent page caching
  * --redirection: the number of redirects to follow, 0 is default
  *
  * Examples:
- * wp --url=wpsite.example.org go-newrelic excercise "http://wpsite.example.org/" --count=13 --rand
- * wp --url=wpsite.example.org go-newrelic excercise url-list.txt --count=13 --rand
+ * wp --url=wpsite.example.org go-newrelic exercise "http://wpsite.example.org/" --count=13 --rand
+ * wp --url=wpsite.example.org go-newrelic exercise url-list.txt --count=13 --rand
  *
  * TODO:
  * Metrics are collected for summation, but none is done.
@@ -20,7 +20,7 @@
 
 class GO_NewRelic_Wpcli extends WP_CLI_Command
 {
-	public function excercise( $args, $assoc_args )
+	public function exercise( $args, $assoc_args )
 	{
 		// don't this in New Relic
 		if ( function_exists( 'newrelic_ignore_transaction' ) )
