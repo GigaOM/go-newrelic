@@ -159,7 +159,7 @@ class GO_NewRelic
 	 */
 	public function timer( $name = '', $group = 'no group' )
 	{
-		if( ! isset( $this->last_timer->$group ) )
+		if ( ! isset( $this->last_timer->$group ) )
 		{
 			$this->last_timer->$group = 0;
 		}
@@ -168,10 +168,9 @@ class GO_NewRelic
 		$change = $current_timer - $this->last_timer->$group;
 		$this->last_timer->$group = $current_timer;
 
-		echo '<!-- ' . esc_attr( "Total Time: $current_timer | $group > {$name}: " ) . number_format( $change, 3 ) . ' -->';
+		echo '<!-- ' . esc_attr( "Total Time: $current_timer | $group / {$name}: " ) . number_format( $change, 3 ) . ' -->';
 	}//END timer
-
-}// END class
+}//END class
 
 function go_newrelic()
 {
