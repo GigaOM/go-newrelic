@@ -11,6 +11,7 @@
  * Examples:
  * wp --url=wpsite.example.org go-newrelic exercise "http://wpsite.example.org/" --count=13 --rand
  * wp --url=wpsite.example.org go-newrelic exercise url-list.txt --count=13 --rand
+ * while true; do wp --url=wpsite.example.org go-newrelic exercise url-list.txt --count=7 --rand; sleep 100; done
  *
  * TODO:
  * Metrics are collected for summation, but none is done.
@@ -26,18 +27,18 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 		if ( function_exists( 'newrelic_ignore_transaction' ) )
 		{
 			newrelic_ignore_transaction();
-		}
+		}//end if
 
 		if ( empty( $args ) )
 		{
 			WP_CLI::error( 'Please specify a URL (or file with URLs) to test.' );
 			return;
-		}
+		}//end if
 
 		if ( ! is_array( $assoc_args ) )
 		{
 			$assoc_args = array();
-		}
+		}//end if
 
 		if (
 			file_exists( $args[0] ) &&
@@ -50,13 +51,13 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 				$assoc_args['url'] = $this->find_url( $url );
 				self::test_url( $assoc_args );
 			}
-		}
+		}//end if
 		else
 		{
 			$assoc_args['url'] = $this->find_url( $args[0] );
 			self::test_url( $assoc_args );
-		}
-	}
+		}//end else
+	}//end exercise
 
 	public function test_url( $args )
 	{
@@ -76,7 +77,7 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 		WP_CLI::line( "\n$args->url" );
 		if ( $args->rand )
 		{
-			WP_CLI::line( "URL will include randomized get vars to (maybe) break caching" );
+			WP_CLI::line( 'URL will include randomized get vars to (maybe) break caching' );
 		}
 		WP_CLI::line( "Response\nCode\tSize\tTime\tCookies\tLast Modified\t\t\tCache Control\t\t\tCanonical" );
 
@@ -135,7 +136,7 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 			)
 			{
 				$runs[ $i ]->response_canonical = $this->find_url( $temp );
-			}
+			}//end if
 			else
 			{
 				preg_match_all( '#<link([^>]+)(/>|></link>)#is', wp_remote_retrieve_body( $fetch_raw ), $matches );
@@ -147,8 +148,7 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 						break;
 					}
 				}
-
-			}
+			}//end else
 
 			WP_CLI::line( sprintf(
 				"%d\t%sK\t%s\t%d\t%s\t%s\t%s",
@@ -160,8 +160,8 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 				$runs[ $i ]->response_cachecontrol,
 				$runs[ $i ]->response_canonical
 			) );
-		}
-	}
+		}//end for
+	}//end test_url
 
 	public function find_url( $text )
 	{
@@ -171,8 +171,8 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 		if ( ! isset( $urls[0][0] ) )
 		{
 			return NULL;
-		} 
+		}
 
 		return $urls[0][0];
-	}
-}
+	}//end find_url
+}//end class
