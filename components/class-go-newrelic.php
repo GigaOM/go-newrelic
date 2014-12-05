@@ -168,7 +168,7 @@ class GO_NewRelic
 		$change = $current_timer - $this->last_timer->$group;
 		$this->last_timer->$group = $current_timer;
 
-		echo esc_attr( '<!-- Total Time: $current_timer | {$name}: $change -->' );
+		echo '<!-- ' . esc_attr( "Total Time: $current_timer | {$name}: $change" ) . ' -->';
 	}//END timer
 
 }// END class
