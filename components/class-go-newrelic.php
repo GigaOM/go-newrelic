@@ -4,6 +4,7 @@ class GO_NewRelic
 {
 	private $apm;
 	private $browser;
+	private $last_timer;
 	private $wpcli;
 
 	public function __construct()
@@ -25,6 +26,9 @@ class GO_NewRelic
 		{
 			$this->wpcli();
 		}//end if
+
+		// init the last_timer object for use later
+		$this->last_timer = (object) array();
 	}// END __construct
 
 	/**
@@ -147,6 +151,26 @@ class GO_NewRelic
 
 		return $app_name;
 	}//END get_appname
+
+	/**
+	 * A timer that can be used anywhere
+	 *
+	 * Inspired by some work and code by Mark Jaquith http://coveredwebservices.com/
+	 */
+	public function timer( $name = '', $group = 'no group' )
+	{
+		if( ! isset( $this->last_timer->$group ) )
+		{
+			$this->last_timer->$group = 0;
+		}
+
+		$current_timer = timer_stop( 0 );
+		$change = $current_timer - $this->last_timer->$group;
+		$this->last_timer->$group = $current_timer;
+
+		echo esc_attr( '<!-- Total Time: $current_timer | {$name}: $change -->' );
+	}//END timer
+
 }// END class
 
 function go_newrelic()
