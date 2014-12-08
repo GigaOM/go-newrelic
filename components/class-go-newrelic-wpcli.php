@@ -21,6 +21,8 @@
 
 class GO_NewRelic_Wpcli extends WP_CLI_Command
 {
+	private $token = NULL;
+
 	public function exercise( $args, $assoc_args )
 	{
 		// don't this in New Relic
@@ -59,13 +61,14 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 		}//end else
 	}//end exercise
 
-	public function test_url( $args )
+	private function test_url( $args )
 	{
 		$args = (object) wp_parse_args( $args, array(
 			'url' => NULL,
 			'count' => 11,
 			'redirection' => 0,
 			'rand' => FALSE,
+			'user_id' => FALSE,
 		) );
 
 		if ( ! $args->url )
@@ -78,6 +81,12 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 		if ( $args->rand )
 		{
 			WP_CLI::line( 'URL will include randomized get vars to (maybe) break caching' );
+		}
+		$cookies = array();
+		if ( $args->user_id )
+		{
+			$cookies = $this->get_auth_cookies( $args->user_id );
+			WP_CLI::line( 'Using cookies from user ID ' . $args->user_id );
 		}
 		WP_CLI::line( "Response\nCode\tSize\tTime\tCookies\tLast Modified\t\t\tCache Control\t\t\tCanonical" );
 
@@ -102,6 +111,7 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 				'timeout'     => 90,
 				'redirection' => absint( $args->redirection ),
 				'headers'     => array( 'x-go-newrelic-exercise' => rand() ),
+				'cookies'     => $cookies,
 				'user-agent'  => 'go-newrelic WordPress exerciser',
 				'sslverify'   => FALSE, // this would be hugely insecure if we were doing anything with the data returned, but since this is used for testing (often against local hosts with self-signed certs)....
 			) );
@@ -161,9 +171,13 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 				$runs[ $i ]->response_canonical
 			) );
 		}//end for
+
+		// indeiscriminately attempt to clear the session
+		// prevents accumulation of sessions in user_meta
+		$this->clear_auth_session( $args->user_id );
 	}//end test_url
 
-	public function find_url( $text )
+	private function find_url( $text )
 	{
 		// nice regex thanks to John Gruber http://daringfireball.net/2010/07/improved_regex_for_matching_urls
 		preg_match_all( '#(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:\'".,<>?«»“”‘’]))#', $text, $urls );
@@ -175,4 +189,29 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 
 		return $urls[0][0];
 	}//end find_url
+
+	private function get_auth_cookies( $user_id )
+	{
+		$expiration = time() + DAY_IN_SECONDS;
+
+		require_once( ABSPATH . WPINC . '/session.php' );
+
+		$manager = WP_Session_Tokens::get_instance( $user_id );
+		$this->token = $manager->create( $expiration );
+
+		return array(
+			SECURE_AUTH_COOKIE => wp_generate_auth_cookie( $user_id, $expiration, 'secure_auth', $this->token ),
+			AUTH_COOKIE        => wp_generate_auth_cookie( $user_id, $expiration, 'auth',        $this->token ),
+			LOGGED_IN_COOKIE   => wp_generate_auth_cookie( $user_id, $expiration, 'logged_in',   $this->token ),
+		);
+	}//end get_auth_cookies
+
+	private function clear_auth_session( $user_id )
+	{
+		if ( $this->token )
+		{
+			$manager = WP_Session_Tokens::get_instance( $user_id );
+			$manager->destroy( $this->token );
+		}
+	}//end clear_auth_session
 }//end class
