@@ -12,8 +12,9 @@ class GO_NewRelic_Browser
 		if ( $this->settings )
 		{
 			// New Relic claims we are not tracking because the code should occur before any other scripts in the head, let's move it up!
-			add_action( 'wp_head', array( $this, 'output_browser_tracking_code' ), 0 );
-			add_action( 'admin_print_scripts', array( $this, 'output_browser_tracking_code' ), 0 );
+			add_action( 'go_newrelic_browser', array( $this, 'output_browser_tracking_code' ) );
+			// admin_print_scripts is more appropriate, but this needs to happed as soon as possible
+			add_action( 'admin_enqueue_scripts', array( $this, 'output_browser_tracking_code' ), 0 );
 		}//end if
 
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
