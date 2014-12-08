@@ -64,15 +64,17 @@ class GO_NewRelic
 	 */
 	public function wpcli()
 	{
-		if ( ! $this->wpcli )
+		if ( $this->wpcli )
 		{
-			require_once __DIR__ . '/class-go-newrelic-wpcli.php';
-
-			// declare the class to WP:CLI
-			WP_CLI::add_command( 'go-newrelic', 'GO_NewRelic_Wpcli' );
-
-			$this->wpcli = TRUE;
+			return TRUE;
 		}
+
+		require_once __DIR__ . '/class-go-newrelic-wpcli.php';
+
+		// declare the class to WP:CLI
+		WP_CLI::add_command( 'go-newrelic', 'GO_NewRelic_Wpcli' );
+
+		$this->wpcli = TRUE;
 	}//end wpcli
 
 	/**

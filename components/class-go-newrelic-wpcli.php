@@ -1,29 +1,31 @@
 <?php
-
-/*
- * Args:
- * A URL or filename containing a list of URLs
- *	...A list of URLs should be a text file with one URL per line
- * --count: the integer number of times to test the named URL(s)
- * --rand: if present will cause the exerciser to insert random get vars that (maybe) will prevent page caching
- * --redirection: the number of redirects to follow, 0 is default
- * --user_id: if present, will cause the request to be made with the specified user's authentication tokens
- *
- * Examples:
- * wp --url=wpsite.example.org go-newrelic exercise "http://wpsite.example.org/" --count=13 --rand
- * wp --url=wpsite.example.org go-newrelic exercise url-list.txt --count=13 --rand
- * while true; do wp --url=wpsite.example.org go-newrelic exercise url-list.txt --count=7 --rand; sleep 100; done
- *
- * TODO:
- * Metrics are collected for summation, but none is done.
- * Summation by URL and among a group of URLs would be great
- * Output in CSV form, maybe...
- */
-
 class GO_NewRelic_Wpcli extends WP_CLI_Command
 {
 	private $token = NULL;
 
+	/**
+	 * "exercise" one or more URLs
+	 *
+	 * This is just a dispatcher and iterator, the real work is done in other methods.
+	 *
+	 * Args:
+	 * A URL or filename containing a list of URLs
+	 *	...A list of URLs should be a text file with one URL per line
+	 * --count: the integer number of times to test the named URL(s)
+	 * --rand: if present will cause the exerciser to insert random get vars that (maybe) will prevent page caching
+	 * --redirection: the number of redirects to follow, 0 is default
+	 * --user_id: if present, will cause the request to be made with the specified user's authentication tokens
+	 *
+	 * Examples:
+	 * wp --url=wpsite.example.org go-newrelic exercise "http://wpsite.example.org/" --count=13 --rand
+	 * wp --url=wpsite.example.org go-newrelic exercise url-list.txt --count=13 --rand
+	 * while true; do wp --url=wpsite.example.org go-newrelic exercise url-list.txt --count=7 --rand; sleep 100; done
+	 *
+	 * TODO:
+	 * Metrics are collected for summation, but none is done.
+	 * Summation by URL and among a group of URLs would be great
+	 * Output in CSV form, maybe...
+	 */
 	public function exercise( $args, $assoc_args )
 	{
 		// don't this in New Relic
@@ -62,6 +64,11 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 		}//end else
 	}//end exercise
 
+	/**
+	 * Actually fetch the URL
+	 *
+	 * Given the args passed from exercise().
+	 */
 	private function test_url( $args )
 	{
 		$args = (object) wp_parse_args( $args, array(
@@ -178,6 +185,11 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 		$this->clear_auth_session( $args->user_id );
 	}//end test_url
 
+	/**
+	 * Extract what looks like a URL from unstructured text
+	 *
+	 * Used when reading headers, not for parsing user input.
+	 */
 	private function find_url( $text )
 	{
 		// nice regex thanks to John Gruber http://daringfireball.net/2010/07/improved_regex_for_matching_urls
@@ -191,6 +203,13 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 		return $urls[0][0];
 	}//end find_url
 
+	/**
+	 * Get auth cookies and start a session for a user
+	 *
+	 * This is not the security vulerability you think it is:
+	 * 1. anybody with access to WP:CLI can execute commands on behalf of a user without knowing the password
+	 * 2. the session is destroyed when done, so the cookie becomes invalid and useless if intercepted
+	 */
 	private function get_auth_cookies( $user_id )
 	{
 		$expiration = time() + DAY_IN_SECONDS;
@@ -207,6 +226,9 @@ class GO_NewRelic_Wpcli extends WP_CLI_Command
 		);
 	}//end get_auth_cookies
 
+	/**
+	 * Destroy the user session
+	 */
 	private function clear_auth_session( $user_id )
 	{
 		if ( $this->token )
