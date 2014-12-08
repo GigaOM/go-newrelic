@@ -7,6 +7,7 @@
  * --count: the integer number of times to test the named URL(s)
  * --rand: if present will cause the exerciser to insert random get vars that (maybe) will prevent page caching
  * --redirection: the number of redirects to follow, 0 is default
+ * --user_id: if present, will cause the request to be made with the specified user's authentication tokens
  *
  * Examples:
  * wp --url=wpsite.example.org go-newrelic exercise "http://wpsite.example.org/" --count=13 --rand
