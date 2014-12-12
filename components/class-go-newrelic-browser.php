@@ -41,7 +41,7 @@ class GO_NewRelic_Browser
 					echo ', ';
 				}//end if
 
-				echo "'" . esc_js( $key ) . "': '" . esc_js( $value ) . "'";
+				echo esc_js( $key ) . ": '" . esc_js( $value ) . "'";
 				$i++;
 			}//end foreach
 			?>
