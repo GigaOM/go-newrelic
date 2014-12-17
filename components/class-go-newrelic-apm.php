@@ -20,9 +20,6 @@ class GO_NewRelic_APM
 			ini_set( 'newrelic.license', $this->config['license'] );
 		}// END if
 
-		// set the app name
-		newrelic_set_appname( $this->go_newrelic->get_appname() );
-
 		// basic settings
 		// make sure the config isn't empty or invalid for any of these
 		// ...sanity and validation intentionally skipped for performance reasons
@@ -54,15 +51,18 @@ class GO_NewRelic_APM
 			add_action( 'template_include', array( $this, 'template_include' ) );
 		}// END else
 
-		// track the user info
+		// track the user info and more
 		add_action( 'init', array( $this, 'init' ) );
 	}//end __construct
 
 	/**
-	 * add user info now that we know it
+	 * add more info now that we know it
 	 */
 	public function init()
 	{
+		// set the app name
+		newrelic_set_appname( $this->go_newrelic->get_appname() );
+
 		// not all versions of the php extension support this method
 		if ( ! function_exists( 'newrelic_set_user_attributes' ) )
 		{
