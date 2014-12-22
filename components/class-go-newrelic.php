@@ -4,18 +4,31 @@ class GO_NewRelic
 {
 	private $apm;
 	private $browser;
+	private $last_timer;
+	private $wpcli;
 
 	public function __construct()
 	{
-		// use the fancier APM if we have the New Relic extension
+		// use the fancier APM if we have the New Relic module for PHP
 		// see https://newrelic.com/docs/php/new-relic-for-php for installation instructions
 		if ( function_exists( 'newrelic_set_appname' ) )
 		{
 			$this->apm();
-			return;
+		}//end if
+		// browser monitoring works even when the PHP module isn't installed
+		else
+		{
+			$this->browser();
+		}
+
+		// WPCLI methods to exercise a site
+		if ( defined( 'WP_CLI' ) && WP_CLI )
+		{
+			$this->wpcli();
 		}//end if
 
-		$this->browser();
+		// init the last_timer object for use later
+		$this->last_timer = (object) array();
 	}// END __construct
 
 	/**
@@ -45,6 +58,24 @@ class GO_NewRelic
 
 		return $this->apm;
 	} // END apm
+
+	/**
+	 * A loader for the WP:CLI class
+	 */
+	public function wpcli()
+	{
+		if ( $this->wpcli )
+		{
+			return TRUE;
+		}
+
+		require_once __DIR__ . '/class-go-newrelic-wpcli.php';
+
+		// declare the class to WP:CLI
+		WP_CLI::add_command( 'go-newrelic', 'GO_NewRelic_Wpcli' );
+
+		$this->wpcli = TRUE;
+	}//end wpcli
 
 	/**
 	 * returns our current configuration, or a value in the configuration.
@@ -122,7 +153,26 @@ class GO_NewRelic
 
 		return $app_name;
 	}//END get_appname
-}// END class
+
+	/**
+	 * A timer that can be used anywhere
+	 *
+	 * Inspired by some work and code by Mark Jaquith http://coveredwebservices.com/
+	 */
+	public function timer( $name = '', $group = 'no group' )
+	{
+		if ( ! isset( $this->last_timer->$group ) )
+		{
+			$this->last_timer->$group = 0;
+		}
+
+		$current_timer = timer_stop( 0 );
+		$change = $current_timer - $this->last_timer->$group;
+		$this->last_timer->$group = $current_timer;
+
+		echo '<!-- ' . esc_attr( "Total Time: $current_timer | $group / {$name}: " ) . number_format( $change, 3 ) . ' -->';
+	}//END timer
+}//END class
 
 function go_newrelic()
 {
