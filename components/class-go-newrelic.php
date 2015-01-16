@@ -9,7 +9,6 @@ class GO_NewRelic
 
 	public function __construct()
 	{
-
 		// use the fancier APM if we have the New Relic module for PHP
 		// see https://newrelic.com/docs/php/new-relic-for-php for installation instructions
 		if ( function_exists( 'newrelic_set_appname' ) )
@@ -31,7 +30,6 @@ class GO_NewRelic
 		// init the last_timer object for use later
 		$this->last_timer = (object) array();
 	}// END __construct
-
 
 	/**
 	 * an object accessor for the browser object
