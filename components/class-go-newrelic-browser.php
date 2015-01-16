@@ -102,7 +102,7 @@ class GO_NewRelic_Browser
 	private function is_enabled()
 	{
 		return get_option( $this->slug . '-enabled' );
-	}//end enabled
+	}//end is_enabled
 
 	private function update_settings( $script )
 	{
