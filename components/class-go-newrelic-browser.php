@@ -65,7 +65,7 @@ class GO_NewRelic_Browser
 				<?php
 				wp_nonce_field( plugin_basename( __FILE__ ), $this->slug . '-nonce' );
 				wp_nonce_field( 'my_special_box_nonce', 'special_box_nonce' );
-    			?>
+				?>
 				<h3>Paste your New Relic tracking code here</h3>
 				<p>Your application ID, license key, and other goodies will be extracted to allow safe generation and output of the tracking code</p>
 				<textarea cols="100" rows="15" name="go-newrelic-script" style="white-space: nowrap; overflow: auto;"></textarea>
