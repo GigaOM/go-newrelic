@@ -95,7 +95,7 @@ class GO_NewRelic_Browser
 
 	private function enable( $enabled )
 	{
-		return update_option( $this->slug . '-enabled', (bool)$enabled );
+		return update_option( $this->slug . '-enabled', (bool) $enabled );
 	}//end enable
 
 	private function is_enabled()
