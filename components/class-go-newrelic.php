@@ -9,6 +9,7 @@ class GO_NewRelic
 
 	public function __construct()
 	{
+		add_action( 'admin_init', array( $this, 'admin_init' ) );
 		// use the fancier APM if we have the New Relic module for PHP
 		// see https://newrelic.com/docs/php/new-relic-for-php for installation instructions
 		if ( function_exists( 'newrelic_set_appname' ) )
@@ -30,6 +31,27 @@ class GO_NewRelic
 		// init the last_timer object for use later
 		$this->last_timer = (object) array();
 	}// END __construct
+
+	public function admin_init()
+	{
+		add_meta_box( 'go_newrelic', 'New Relic On or Off', array( $this, 'metabox' ), 'post' );
+	} // END admin_init
+
+	Public function metabox()
+	{
+
+		$checked = ! get_post_meta( $post_id, 'go_newrelic_disable', TRUE )  ? TRUE : FALSE;
+
+		?>
+		<div id="display-newrelic">
+			<p>
+				<input type="checkbox" id="newrelic-enable" name="newrelic_enable" <?php checked( $checked ); ?> />
+				<label for="newrelic-disable">Automatically enable newrelic</label>
+			</p>
+		</div>
+		<?php
+
+	}//end metabox
 
 	/**
 	 * an object accessor for the browser object

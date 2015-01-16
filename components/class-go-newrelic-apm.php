@@ -60,6 +60,7 @@ class GO_NewRelic_APM
 	 */
 	public function init()
 	{
+		add_meta_box( 'go_newrelic', 'New Relic On or Off', array( $this, 'metabox' ), 'post' );
 		// set the app name
 		newrelic_set_appname( $this->go_newrelic->get_appname() );
 
@@ -81,7 +82,21 @@ class GO_NewRelic_APM
 			newrelic_set_user_attributes( 'not-logged-in', '', 'no-role' );
 		}// END else
 	}// END init
+	public function metabox()
+	{
 
+		$checked = ! get_post_meta( $post_id, 'go_newrelic_disable', TRUE )  ? TRUE : FALSE;
+
+		?>
+		<div id="display-newrelic">
+			<p>
+				<input type="checkbox" id="newrelic-enable" name="newrelic_enable" <?php checked( $checked ); ?> />
+				<label for="newrelic-disable">Automatically enable newrelic</label>
+			</p>
+		</div>
+		<?php
+
+	}//end metabox
 	/**
 	 * track the template we're using
 	 */
