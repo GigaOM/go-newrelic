@@ -20,7 +20,6 @@ class GO_NewRelic_Browser
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 	}// end __construct
 
-
 	public function admin_menu()
 	{
 		add_options_page( $this->name . ' Settings', $this->name . ' Settings', 'manage_options', $this->slug . '-settings', array( $this, 'settings' ) );
@@ -28,7 +27,7 @@ class GO_NewRelic_Browser
 
 	public function output_browser_tracking_code()
 	{
-		if ( ! $this->enabled() )
+		if ( ! $this->is_enabled() )
 		{
 			return;
 		}//end if
@@ -40,7 +39,6 @@ class GO_NewRelic_Browser
 		</script>
 		<?php
 	}// end output_browser_tracking_code
-
 
 	public function settings()
 	{
@@ -58,12 +56,12 @@ class GO_NewRelic_Browser
 			$this->update_settings( $_POST['go-newrelic-script'] );
 			$this->enable( $_POST['newrelic-enable'] );
 		}//end if
-		$checked = $this->enabled();
+
 		?>
 		<div class="wrap">
 			<h2><?php echo esc_html( $this->name ); ?> Settings</h2>
 			<form method="post">
-				<input type="checkbox" id="newrelic-enable" name="newrelic-enable" value="1" <?php checked( $checked ); ?> />
+				<input type="checkbox" id="newrelic-enable" name="newrelic-enable" value="1" <?php checked( $this->is_enabled() ); ?> />
 				<label for="newrelic-enable">Enable New Relic</label></br>
 				<?php wp_nonce_field( plugin_basename( __FILE__ ), $this->slug . '-nonce' );
     			wp_nonce_field( 'my_special_box_nonce', 'special_box_nonce' );?>
@@ -74,7 +72,6 @@ class GO_NewRelic_Browser
 					<input type="submit" value="Submit" class="button-primary"/>
 				</p>
 			</form>
-
 			<?php
 			if ( $this->settings )
 			{
@@ -94,7 +91,6 @@ class GO_NewRelic_Browser
 			?>
 		</div>
 		<?php
-
 	}// end settings
 
 	private function enable( $enabled )
@@ -102,14 +98,13 @@ class GO_NewRelic_Browser
 		return update_option( $this->slug . '-enabled', (bool)$enabled );
 	}//end enable
 
-	private function enabled()
+	private function is_enabled()
 	{
 		return get_option( $this->slug . '-enabled' );
 	}//end enabled
 
 	private function update_settings( $script )
 	{
-
 		$script = stripslashes( $script );
 		preg_match( '/NREUM\.info=\{(.*)\}/', $script, $matches );
 		$vars = explode( ',', $matches[1] );
