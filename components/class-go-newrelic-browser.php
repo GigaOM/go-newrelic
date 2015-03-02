@@ -53,7 +53,7 @@ class GO_NewRelic_Browser
 		)
 		{
 			$this->enable( $_POST['newrelic-enable'] );
-			if ( ! empty($_POST['go-newrelic-script']) )
+			if ( ! empty( $_POST['go-newrelic-script'] ) )
 			{
 				$this->update_settings( $_POST['go-newrelic-script'] );
 			}
