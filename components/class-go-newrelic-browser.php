@@ -52,8 +52,14 @@ class GO_NewRelic_Browser
 			&& wp_verify_nonce( $_POST[ $this->slug . '-nonce' ], plugin_basename( __FILE__ ) )
 		)
 		{
-			$this->update_settings( $_POST['go-newrelic-script'] );
 			$this->enable( $_POST['newrelic-enable'] );
+			if (
+				! empty($_POST['go-newrelic-script'])
+				&& $this->is_enabled()
+			)
+			{
+				$this->update_settings( $_POST['go-newrelic-script'] );
+			}
 		}//end if
 
 		?>
@@ -73,7 +79,7 @@ class GO_NewRelic_Browser
 				</p>
 			</form>
 			<?php
-			if ( $this->settings )
+			if ($this->settings )
 			{
 				?>
 				<h3>Extracted settings</h3>
