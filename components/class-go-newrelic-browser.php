@@ -76,7 +76,7 @@ class GO_NewRelic_Browser
 				</p>
 			</form>
 			<?php
-			if ($this->settings )
+			if ( $this->settings )
 			{
 				?>
 				<h3>Extracted settings</h3>
